@@ -11,7 +11,6 @@ node_modules
 dist
 dist-ssr
 .env
-uploads
 
 # Editor directories and files
 .vscode/*
@@ -23,3 +22,4 @@ uploads
 *.njsproj
 *.sln
 *.sw?
+.vercel
