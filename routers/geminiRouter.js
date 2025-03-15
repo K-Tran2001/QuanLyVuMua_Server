@@ -4,7 +4,7 @@ const router = Router();
 
 
 
-//router.get("/api",getAPI)
+router.get("/api/getMethod",(req,res)=>res.json({response:"hello"}))
 router.post("/api/geminiChatBot",geminiChatBot)
 
 
