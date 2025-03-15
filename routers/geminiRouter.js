@@ -1,5 +1,5 @@
 const  {Router} = require('express');
-const { getAPI, geminiChatBot } = require('../controllers/geminiController');
+const {  geminiChatBot, geminiChatBot_v2 } = require('../controllers/geminiController');
 const router = Router();
 
 

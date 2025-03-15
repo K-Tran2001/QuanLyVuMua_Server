@@ -3,6 +3,7 @@ const userModel = require("../models/userModel");
 const BaseResponse = require('./BaseResponse'); // Đường dẫn phải đúng
 const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
+const { default: messaging } = require("./config/firebaseConfig");
 
 
 const accessTokenLife = process.env.ACCESS_TOKEN_LIFE;
@@ -199,6 +200,21 @@ module.exports.RefreshToken = async (req, res) => {
 		return res.status(500).json({ message: 'Lỗi khi làm mới token', error: err.message });
 	}
 };
+
+// //androi:BHeROs601ml3PM1yI1hxroQXuUG9oT9hi2sxhdjK9xqGD9xQziIadr_hnUk7kOuBGaQiGF8jEzfxF0bL3oj6JU4
+// const requestForToken = async () => {
+//   try {
+//     const token = await getToken(messaging, { vapidKey: "BHeROs601ml3PM1yI1hxroQXuUG9oT9hi2sxhdjK9xqGD9xQziIadr_hnUk7kOuBGaQiGF8jEzfxF0bL3oj6JU4" });
+//     if (token) {
+//       console.log("FCM Token:", token);
+//       return token;
+//     } else {
+//       console.log("No registration token available.");
+//     }
+//   } catch (error) {
+//     console.error("Error getting FCM token:", error);
+//   }
+// };
 
 
 
