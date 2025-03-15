@@ -26,13 +26,14 @@ app.use(uploadRoter)
 app.use(uploadImgurRoter)
 app.use(uploadCloudinaryRoter)
 app.use(geminiRouter)
+app.get("/",(req,res)=>res.json({response:"hello"}))
 
 // app.use(cors({
 //     origin: '*', // hoặc cụ thể 'http://your-expo-ip:port'
 // }));
 // Cho phép tất cả các origin hoặc chỉ định domain cụ thể
 app.use(cors({
-    origin: 'https://quanlyvumua.vercel.app', // Chỉ cho phép trang web của bạn truy cập
+    origin: '*', // hoặc cụ thể 'http://your-expo-ip:port''https://quanlyvumua.vercel.app', // Chỉ cho phép trang web của bạn truy cập
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
