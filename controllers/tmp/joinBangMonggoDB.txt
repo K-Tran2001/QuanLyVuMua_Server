@@ -1,0 +1,56 @@
+drugStoreRouter.get(
+  "/:id/categories/userGet",
+  asyncHandler(async (req, res) => {
+    const ObjectId = mongoose.Types.ObjectId;
+    const pageSize = 2;
+    const currentPage = Number(req.query.pageNumber) || 1;
+
+    const drugstore = await DrugStore.aggregate([
+      {
+        $lookup: {
+          from: "products",
+          localField: "product",
+          foreignField: "_id",
+          as: "product",
+        },
+      },
+      {
+        $lookup: {
+          from: "categories",
+          localField: "product.category",
+          foreignField: "_id",
+          as: "categories",
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          product: 1,
+          discount: 1,
+          discount: 1,
+          refunded: 1,
+          isActive: 1,
+          stock: 1,
+          "categories._id": 1,
+          "categories.name": 1,
+          isActive: 1,
+        },
+      },
+      {
+        //req.params.id
+        $match: {
+          "categories._id": ObjectId(req.params.id),
+          isActive: true,
+        },
+      },
+    ]);
+    //.find()
+    //res.json(drugstore);
+    const count = drugstore.length;
+    const totalPage = [];
+    for (let i = 1; i <= Math.ceil(count / pageSize); i++) {
+      totalPage.push(i);
+    }
+    res.json({ drugstore, currentPage, totalPage });
+  }),
+);
