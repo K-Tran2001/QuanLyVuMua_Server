@@ -5,6 +5,10 @@ const _Schema = new mongoose.Schema({
         type:String,
         
     }, 
+    type : {
+        type:String,
+        
+    }, 
 },{ timestamps: true } // Tự động thêm createdAt và updatedAt
 )
 

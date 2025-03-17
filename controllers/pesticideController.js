@@ -1,14 +1,13 @@
 
 const fs = require('fs');
 const path = require('path');
-const plantModel = require("../models/plantModel");
+const pesticideModel = require("../models/pesticideModel");
 const BaseResponse = require('./BaseResponse');
-const categoryModel = require('../models/categoryModel');
 const xlsx = require("xlsx");
 const ObjectId = require('mongoose').Types.ObjectId;
 
 
-module.exports.GetAllPlant = async (req, res) => {
+module.exports.GetAllPesticide = async (req, res) => {
   const response = new BaseResponse();
   try {
     const { keySearch, categoryId = null, page = 1, pageSize = 10, sortField = "createdAt", sortOrder = "desc", sortOptions } = req.body;
@@ -27,10 +26,10 @@ module.exports.GetAllPlant = async (req, res) => {
     }
 
     // Lấy tổng số bản ghi thỏa mãn điều kiện
-    const totalRecords = await plantModel.countDocuments(filter);
+    const totalRecords = await pesticideModel.countDocuments(filter);
 
 
-    const data = await plantModel.aggregate([
+    const data = await pesticideModel.aggregate([
       { $match: filter },
       {
         $lookup: {
@@ -77,7 +76,7 @@ module.exports.GetAllPlant = async (req, res) => {
 };
 
 
-module.exports.SeachPlant = async (req, res) => {
+module.exports.SeachPesticide = async (req, res) => {
   let response = new BaseResponse();
     try {
         const { id } = req.params; // Lấy ID từ URL params
@@ -88,8 +87,8 @@ module.exports.SeachPlant = async (req, res) => {
             return res.status(400).json(response);
         }
 
-        //const result = await plantModel.findById(id); // Tìm kiếm theo ID trong MongoDB
-        const result = await plantModel.aggregate([
+        //const result = await pesticideModel.findById(id); // Tìm kiếm theo ID trong MongoDB
+        const result = await pesticideModel.aggregate([
           { $match: { _id: new ObjectId(id) } }, // Tìm kiếm theo id
           {
             $lookup: {
@@ -130,7 +129,7 @@ module.exports.SeachPlant = async (req, res) => {
 };
 
 
-module.exports.CreatePlant = async (req, res) => {
+module.exports.CreatePesticide = async (req, res) => {
   const response = new BaseResponse();
     try {
       
@@ -156,7 +155,7 @@ module.exports.CreatePlant = async (req, res) => {
       }
       
       //Truy vấn monggo
-        const result = await plantModel.create(newData);
+        const result = await pesticideModel.create(newData);
         if (!result) {
           response.success = false
           response.message='Có lỗi trong quá trình thực hiện, vui lòng thử lại.'
@@ -171,7 +170,7 @@ module.exports.CreatePlant = async (req, res) => {
       res.status(500).json(response);
     }
 };
-module.exports.CreatePlant_UploadMulti = async (req, res) => {
+module.exports.CreatePesticide_UploadMulti = async (req, res) => {
   const response = new BaseResponse();
     try {
       
@@ -199,7 +198,7 @@ module.exports.CreatePlant_UploadMulti = async (req, res) => {
       newData.images = imagePaths; 
 
       //Truy vấn monggo
-        const result = await plantModel.create(newData);
+        const result = await pesticideModel.create(newData);
         if (!result) {
           response.success = false
           response.message='Có lỗi trong quá trình thực hiện, vui lòng thử lại.'
@@ -216,12 +215,12 @@ module.exports.CreatePlant_UploadMulti = async (req, res) => {
 };
 
 
-module.exports.UpdatePlant = async (req, res) => {
+module.exports.UpdatePesticide = async (req, res) => {
   const response = new BaseResponse();
   try {
     const { id } = req.params; // Lấy ID từ URL params
     const {name , description,categoryId = null , oldImages = [], deleteImages=[]} = req.body; // Dữ liệu cập nhật
-    const dataFindById = await plantModel.findById(id);
+    const dataFindById = await pesticideModel.findById(id);
     //Xư lý xóa ảnh deleteImages
 
     //
@@ -270,7 +269,7 @@ module.exports.UpdatePlant = async (req, res) => {
     updateData.images = imagePaths; 
       
     
-    const result = await plantModel.findByIdAndUpdate(id, updateData, { new: true });
+    const result = await pesticideModel.findByIdAndUpdate(id, updateData, { new: true });
 
     if (!result) {
       response.success = false;
@@ -288,12 +287,12 @@ module.exports.UpdatePlant = async (req, res) => {
   }
 };
 
-module.exports.UpdatePlant_UploadMulti = async (req, res) => {
+module.exports.UpdatePesticide_UploadMulti = async (req, res) => {
   const response = new BaseResponse();
   try {
     const { id } = req.params; // Lấy ID từ URL params
     const {name , description, oldImages = [], deleteImages=[]} = req.body; // Dữ liệu cập nhật
-    const dataFindById = await plantModel.findById(id);
+    const dataFindById = await pesticideModel.findById(id);
     var updateData = {
       name, categoryId : new ObjectId("67d15bf94fada66e9cd56f0e"), description
     }
@@ -346,7 +345,7 @@ module.exports.UpdatePlant_UploadMulti = async (req, res) => {
 
     updateData.images =imagePaths_v2
 
-    const result = await plantModel.findByIdAndUpdate(id, updateData, { new: true });
+    const result = await pesticideModel.findByIdAndUpdate(id, updateData, { new: true });
 
     if (!result) {
       response.success = false;
@@ -364,7 +363,7 @@ module.exports.UpdatePlant_UploadMulti = async (req, res) => {
   }
 };
 
-module.exports.DeletePlant = async (req, res) => {
+module.exports.DeletePesticide = async (req, res) => {
   const response = new BaseResponse();
   try {
     const { id } = req.params; // Lấy ID từ URL params
@@ -372,8 +371,8 @@ module.exports.DeletePlant = async (req, res) => {
 
     //Xóa ảnh 
 
-    //Xóa plant
-    const result = await plantModel.findByIdAndDelete(id);
+    //Xóa pesticide
+    const result = await pesticideModel.findByIdAndDelete(id);
 
     if (!result) {
       response.success = false;
@@ -391,7 +390,7 @@ module.exports.DeletePlant = async (req, res) => {
   }
 };
 
-module.exports.ImportPlants = async (req, res) => {
+module.exports.ImportPesticides = async (req, res) => {
   const response = new BaseResponse();
   try {
     if (!req.file) {
@@ -432,7 +431,7 @@ module.exports.ImportPlants = async (req, res) => {
       newData = {...row, categoryId: new ObjectId(row.categoryId)}
       if (newData.name) {
         try {
-          await plantModel.create(newData);
+          await pesticideModel.create(newData);
           successCount++;
         } catch (error) {
           failedItems.push({ newData, error: error.message });
@@ -483,7 +482,7 @@ module.exports.ExportWithFilter = async (req, res) => {
       filter.categoryId = new ObjectId(categoryId);
     }
 
-    const data = await plantModel.aggregate([
+    const data = await pesticideModel.aggregate([
       { $match: filter },
       {
         $lookup: {
@@ -517,11 +516,11 @@ module.exports.ExportWithFilter = async (req, res) => {
   }
 };
 
-module.exports.ExportAllPlant = async (req, res) => {
+module.exports.ExportAllPesticide = async (req, res) => {
   const response = new BaseResponse();
   try {
     var URL_dowload ="";
-    const data = await plantModel.find().sort({ _id: 1 }).exec();
+    const data = await pesticideModel.find().sort({ _id: 1 }).exec();
     
     URL_dowload = exportToExcel(req,data)    
 
@@ -554,7 +553,7 @@ function exportToExcel(req,data) {
   }
   
   try {
-    const fileName = `ExportPlant_${Date.now()}.xlsx`;
+    const fileName = `ExportPesticide_${Date.now()}.xlsx`;
     const filePath = path.join(EXPORT_DIR, fileName);
   
     // Header tùy chỉnh

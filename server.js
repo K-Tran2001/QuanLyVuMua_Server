@@ -6,6 +6,7 @@ const app = express()
 const authRouter = require('./routers/authRouter')
 const categoryRouter = require('./routers/categoryRouter')
 const plantRouter = require('./routers/plantRouter')
+const pesticideRouter = require('./routers/pesticideRouter')
 const uploadRoter = require('./routers/uploadRoter')
 const uploadCloudinaryRoter = require('./routers/uploadCloudinaryRoter')
 const uploadImgurRoter = require('./routers/uploadImgurRoter')
@@ -17,9 +18,13 @@ app.use(cors())
 
 // Cho phép truy cập ảnh từ thư mục "uploads"
 app.use("/uploads", express.static("uploads"));
+// Cho phép truy file từ thư mục "imports/exports"
+app.use("/exports", express.static("exports"));
+app.use("/imports", express.static("imports"));
 
 
 app.use(plantRouter);
+app.use(pesticideRouter);
 app.use(authRouter)
 app.use(categoryRouter)
 app.use(uploadRoter)

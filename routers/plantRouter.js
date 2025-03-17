@@ -1,32 +1,10 @@
 const  {Router} = require('express');
-const { GetAllPlant, SeachPlant, CreatePlant, UpdatePlant, DeletePlant, CreatePlant_UploadMulti, UpdatePlant_UploadMulti } = require('../controllers/plantController');
+const { GetAllPlant, SeachPlant, CreatePlant, UpdatePlant, DeletePlant, CreatePlant_UploadMulti, UpdatePlant_UploadMulti, ImportPlants, ExportPlants, ExportWithFilter, ExportAllPlant } = require('../controllers/plantController');
 const upload = require("../middleware/tmp/uploadMiddleware");
-const multer = require('multer');
-const path = require('path');
+const uploadExcelFile = require("../middleware/tmp/uploadExcelFileMiddleware");
+
 const router = Router();
 
-// const storage = multer.diskStorage({
-//   destination: (req, file, cb) => {
-//     cb(null, "uploads/"); // Thư mục lưu ảnh
-//   },
-//   filename: (req, file, cb) => {
-//     const ext = path.extname(file.originalname);
-//     const uniqueName = Date.now() + "-" + Math.round(Math.random() * 1e9) + ext;
-//     cb(null, uniqueName);
-//   },
-// });
-
-// // Chỉ cho phép upload ảnh (jpg, jpeg, png)
-// const fileFilter = (req, file, cb) => {
-//   if (file.mimetype.startsWith("image/")) {
-//     cb(null, true);
-//   } else {
-//     cb(new Error("Only images are allowed!"), false);
-//   }
-// };
-
-// // Tạo middleware upload
-// const upload = multer({ storage, fileFilter });
 
 
 
@@ -39,6 +17,12 @@ router.post("/api/plant/create-upload-multi",upload.array("files", 5),CreatePlan
 router.post("/api/plant/update/:id",upload.single("files"),UpdatePlant)
 router.post("/api/plant/update-upload-multi/:id",upload.array("files", 5),UpdatePlant_UploadMulti)
 router.post("/api/plant/delete/:id",DeletePlant)
+
+//router.post("/api/plant/import",upload.single("files"),ImportPlants)
+router.post("/api/plant/import",uploadExcelFile.single("files"),ImportPlants)
+router.post("/api/plant/export",ExportWithFilter)
+router.post("/api/plant/export-all",ExportAllPlant)
+
 
 
 

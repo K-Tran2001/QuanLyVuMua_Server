@@ -3,7 +3,7 @@ const categoryModel = require("../models/categoryModel");
 const BaseResponse = require('./BaseResponse');
 
 
-module.exports.GetAllCategory = async (req, res) => {
+module.exports.GetAllCategoryPlants = async (req, res) => {
   const response = new BaseResponse();
   try {
     const { keySearch,typeReq ="plant", page = 1, pageSize = 10, sortField = "createdAt", sortOrder = "desc" } = req.body;
@@ -50,7 +50,7 @@ module.exports.GetAllCategory = async (req, res) => {
   }
 };
 
-module.exports.GetAllCategoryFK = async (req, res) => {
+module.exports.GetAllCategoryPlantsFK = async (req, res) => {
   const response = new BaseResponse();
   try {
     const sortField = "createdAt";
@@ -80,7 +80,7 @@ module.exports.GetAllCategoryFK = async (req, res) => {
 };
 
 
-module.exports.SeachCategory = async (req, res) => {
+module.exports.SeachCategoryPlants = async (req, res) => {
   let response = new BaseResponse();
     try {
         const { id } = req.params; // Lấy ID từ URL params
@@ -111,7 +111,7 @@ module.exports.SeachCategory = async (req, res) => {
 };
 
 
-module.exports.CreateCategory = async (req, res) => {
+module.exports.CreateCategoryPlants = async (req, res) => {
   const response = new BaseResponse();
     try {
       
@@ -133,7 +133,7 @@ module.exports.CreateCategory = async (req, res) => {
     }
 };
 
-module.exports.UpdateCategory = async (req, res) => {
+module.exports.UpdateCategoryPlants = async (req, res) => {
   const response = new BaseResponse();
   try {
     const { id } = req.params; // Lấy ID từ URL params
@@ -157,7 +157,7 @@ module.exports.UpdateCategory = async (req, res) => {
   }
 };
 
-module.exports.DeleteCategory = async (req, res) => {
+module.exports.DeleteCategoryPlants = async (req, res) => {
   const response = new BaseResponse();
   try {
     const { id } = req.params; // Lấy ID từ URL params
