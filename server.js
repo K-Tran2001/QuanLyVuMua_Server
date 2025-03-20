@@ -6,7 +6,10 @@ const app = express()
 const authRouter = require('./routers/authRouter')
 const categoryRouter = require('./routers/categoryRouter')
 const plantRouter = require('./routers/plantRouter')
+const billRouter = require('./routers/billRouter')
 const pesticideRouter = require('./routers/pesticideRouter')
+const gardenRouter = require('./routers/gardenRouter')
+const partnerRouter = require('./routers/partnerRouter')
 const uploadRoter = require('./routers/uploadRoter')
 const uploadCloudinaryRoter = require('./routers/uploadCloudinaryRoter')
 const uploadImgurRoter = require('./routers/uploadImgurRoter')
@@ -25,6 +28,9 @@ app.use("/imports", express.static("imports"));
 
 app.use(plantRouter);
 app.use(pesticideRouter);
+app.use(gardenRouter);
+app.use(partnerRouter);
+app.use(billRouter);
 app.use(authRouter)
 app.use(categoryRouter)
 app.use(uploadRoter)

@@ -44,7 +44,7 @@ module.exports.Login = async (req, res) => {
 
     const isPasswordValid = bcrypt.compareSync(password, user.password);
     if (!isPasswordValid) {
-      response.message = "Matah khẩu không chính xác."
+      response.message = "Mật khẩu không chính xác."
       return res.send(response);
     }
 

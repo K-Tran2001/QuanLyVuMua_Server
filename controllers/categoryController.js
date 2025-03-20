@@ -6,7 +6,7 @@ const BaseResponse = require('./BaseResponse');
 module.exports.GetAllCategory = async (req, res) => {
   const response = new BaseResponse();
   try {
-    const { keySearch,typeReq ="plant", page = 1, pageSize = 10, sortField = "createdAt", sortOrder = "desc" } = req.body;
+    const { keySearch,type , page = 1, pageSize = 10, sortField = "createdAt", sortOrder = "desc" } = req.body;
 
     // Tạo bộ lọc tìm kiếm
     const filter = {};
@@ -27,7 +27,7 @@ module.exports.GetAllCategory = async (req, res) => {
     // Truy vấn dữ liệu có phân trang và sắp xếp
     const data = await categoryModel
       .find(filter)
-      .where("type").equals(typeReq)
+      .where("type").equals(type)
       .sort(sortOptions) // Áp dụng sắp xếp
       .skip((page - 1) * pageSize)
       .limit(parseInt(pageSize));
@@ -53,6 +53,7 @@ module.exports.GetAllCategory = async (req, res) => {
 module.exports.GetAllCategoryFK = async (req, res) => {
   const response = new BaseResponse();
   try {
+    const { type } = req.body
     const sortField = "createdAt";
     const sortOrder = "desc"
 
@@ -63,7 +64,7 @@ module.exports.GetAllCategoryFK = async (req, res) => {
 
     // Truy vấn dữ liệu có phân trang và sắp xếp
     const data = await categoryModel
-      .find()
+      .find({type})
       .sort(sortOptions); // Áp dụng sắp xếp
       
 

@@ -1,5 +1,5 @@
 const  {Router} = require('express');
-const { GetAllPlant, SeachPlant, CreatePlant, UpdatePlant, DeletePlant, CreatePlant_UploadMulti, UpdatePlant_UploadMulti, ImportPlants, ExportPlants, ExportWithFilter, ExportAllPlant } = require('../controllers/plantController');
+const { GetAllPlant, SeachPlant, CreatePlant, UpdatePlant, DeletePlant, CreatePlant_UploadMulti, UpdatePlant_UploadMulti, ImportPlants, ExportPlants, ExportWithFilter, ExportAllPlant, GetAllPlantFK } = require('../controllers/plantController');
 const upload = require("../middleware/tmp/uploadMiddleware");
 const uploadExcelFile = require("../middleware/tmp/uploadExcelFileMiddleware");
 
@@ -11,6 +11,7 @@ const router = Router();
 //files là thuộc tính lưu file đơn or list file của formData FE gửi về
 
 router.post("/api/plant/get-all",GetAllPlant)
+router.post("/api/plant/get-all-fk",GetAllPlantFK)
 router.post("/api/plant/search/:id", SeachPlant )
 router.post("/api/plant/create",upload.single("files"),CreatePlant)
 router.post("/api/plant/create-upload-multi",upload.array("files", 5),CreatePlant_UploadMulti)

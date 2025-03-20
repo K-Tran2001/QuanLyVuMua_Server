@@ -1,16 +1,17 @@
 
 const fs = require('fs');
 const path = require('path');
-const pesticideModel = require("../models/pesticideModel");
+const gardenModel = require("../models/gardenModel");
 const BaseResponse = require('./BaseResponse');
+const categoryModel = require('../models/categoryModel');
 const xlsx = require("xlsx");
 const ObjectId = require('mongoose').Types.ObjectId;
 
 
-module.exports.GetAllPesticide = async (req, res) => {
+module.exports.GetAllGarden = async (req, res) => {
   const response = new BaseResponse();
   try {
-    const { keySearch, categoryId = null, page = 1, pageSize = 10, sortField = "createdAt", sortOrder = "desc", sortOptions } = req.body;
+    const { keySearch, page = 1, pageSize = 10, sortField = "createdAt", sortOrder = "desc", sortOptions } = req.body;
 
     // Tạo bộ lọc tìm kiếm
     const filter = {};
@@ -20,42 +21,15 @@ module.exports.GetAllPesticide = async (req, res) => {
         { description: { $regex: keySearch, $options: "i" } },
       ];
     }
-    // Nếu categoryId có giá trị hợp lệ, thêm vào filter
-    if (categoryId && ObjectId.isValid(categoryId)) {
-      filter.categoryId = new ObjectId(categoryId);
-    }
 
     // Lấy tổng số bản ghi thỏa mãn điều kiện
-    const totalRecords = await pesticideModel.countDocuments(filter);
+    const totalRecords = await gardenModel.countDocuments(filter);
 
-
-    const data = await pesticideModel.aggregate([
-      { $match: filter },
-      {
-        $lookup: {
-          from: "categories",
-          localField: "categoryId",
-          foreignField: "_id",
-          as: "category",
-        },
-      },
-      { $unwind: { path: "$category", preserveNullAndEmptyArrays: true } }, // Giải nén category
-      {
-        $project: {
-          name: 1,
-          description: 1,
-          images:1,
-          createdAt: 1,
-          categoryId: 1,
-          categoryName: { $ifNull: ["$category.name", ""] }, // Đổi tên name thành categoryName và check null thì trả về ""
-        },
-      },
-      { $sort: sortOptions || { _id: 1 }},
-      { $skip: (page - 1) * pageSize },
-      { $limit: parseInt(pageSize) },
-    ]);
-    
-
+    const data = await gardenModel
+      .find(filter)
+      .sort({ [sortField]: sortOrder === "desc" ? -1 : 1 })
+      .skip((page - 1) * pageSize)
+      .limit(parseInt(pageSize));
 
     // Trả về kết quả cho frontend
     response.success = true;
@@ -76,69 +50,88 @@ module.exports.GetAllPesticide = async (req, res) => {
 };
 
 
-module.exports.SeachPesticide = async (req, res) => {
-  let response = new BaseResponse();
-    try {
-        const { id } = req.params; // Lấy ID từ URL params
+module.exports.GetAllGardenFK = async (req, res) => {
+  const response = new BaseResponse();
+  try {
+    const sortField = "createdAt";
+    const sortOrder = "desc"
 
-        if (!id) {
-            response.success = false;
-            response.message = "id is required";
-            return res.status(400).json(response);
-        }
+    // Xác định hướng sắp xếp (1: tăng dần, -1: giảm dần)
+    const sortDirection = sortOrder.toLowerCase() === "asc" ? 1 : -1;
+    const sortOptions = { [sortField]: sortDirection };
 
-        //const result = await pesticideModel.findById(id); // Tìm kiếm theo ID trong MongoDB
-        const result = await pesticideModel.aggregate([
-          { $match: { _id: new ObjectId(id) } }, // Tìm kiếm theo id
-          {
-            $lookup: {
-              from: "categories",
-              localField: "categoryId",
-              foreignField: "_id",
-              as: "category",
-            },
-          },
-          { $unwind: { path: "$category", preserveNullAndEmptyArrays: true } }, // Giữ document dù categoryId null
-          {
-            $project: {
-              name: 1,
-              description: 1,
-              images: 1,
-              createdAt: 1,
-              categoryId: 1,
-              categoryName: { $ifNull: ["$category.name", ""] }, // Nếu không có category, trả về chuỗi rỗng ""
-            },
-          },
-        ]);
 
-        if (!result) {
-            response.success = false;
-            response.message = "Data not found";
-            return res.status(404).json(response);
-        }
+    // Truy vấn dữ liệu có phân trang và sắp xếp
+    const data = await gardenModel
+      .find()
+      .sort(sortOptions); // Áp dụng sắp xếp
+      
 
-        response.data = result;
-        response.message = "Form found successfully";
-        res.json(response);
-    } catch (error) {
-        response.success = false;
-        response.message = error.toString();
-        response.data = null;
-        res.status(500).json(response);
-    }
+    // Trả về kết quả cho frontend
+    response.success = true;
+    response.data = data;
+
+    res.json(response);
+  } catch (error) {
+    response.success = false;
+    response.message = error.toString();
+    res.status(500).json(response);
+  }
 };
 
 
-module.exports.CreatePesticide = async (req, res) => {
+
+
+module.exports.SeachGarden = async (req, res) => {
+  let response = new BaseResponse();
+  try {
+    const { id } = req.params; // Lấy ID từ URL params
+
+    if (!id) {
+      response.success = false;
+      response.message = "id is required";
+      return res.status(400).json(response);
+    }
+
+    const result = await gardenModel.findById(id); // Tìm kiếm theo ID trong MongoDB
+
+    if (!result) {
+      response.success = false;
+      response.message = "Data not found";
+      return res.status(404).json(response);
+    }
+
+    response.success = true;
+    response.data = result;
+    response.message = "Form found successfully";
+    res.json(response);
+  } catch (error) {
+    response.success = false;
+    response.message = error.toString();
+    response.data = null;
+    res.status(500).json(response);
+  }
+};
+
+
+
+module.exports.CreateGarden = async (req, res) => {
   const response = new BaseResponse();
     try {
       
-      const {name, description, categoryId = null} = req.body;
+      const {name, description, numberOfPlants, landArea, gardenDetail} = req.body;
       
+      var _gardenDetail = []
+      try {
+        _gardenDetail = JSON.parse(gardenDetail)
+        _gardenDetail = _gardenDetail.filter(item=>item != null)
+      } catch (error) {
+          _gardenDetail = []
+      }
 
       const imagePath = req.file ? `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}` : "";
       const newData = {
-        name,description,categoryId : categoryId ? new ObjectId(categoryId) :null, images:
+        name,description,numberOfPlants, landArea, gardenDetail : _gardenDetail, images:
         req.file ?
         [
           {
@@ -155,7 +148,7 @@ module.exports.CreatePesticide = async (req, res) => {
       }
       
       //Truy vấn monggo
-        const result = await pesticideModel.create(newData);
+        const result = await gardenModel.create(newData);
         if (!result) {
           response.success = false
           response.message='Có lỗi trong quá trình thực hiện, vui lòng thử lại.'
@@ -170,13 +163,20 @@ module.exports.CreatePesticide = async (req, res) => {
       res.status(500).json(response);
     }
 };
-module.exports.CreatePesticide_UploadMulti = async (req, res) => {
+module.exports.CreateGarden_UploadMulti = async (req, res) => {
   const response = new BaseResponse();
     try {
       
-      const {name, description, categoryId = null, } = req.body;
+      const {name, description, numberOfPlants, landArea, gardenDetail } = req.body;
+      var _gardenDetail = []
+      try {
+        _gardenDetail = JSON.parse(gardenDetail)
+        _gardenDetail = _gardenDetail.filter(item=>item != null)
+      } catch (error) {
+          _gardenDetail = []
+      }
       const newData = {
-        name,description,categoryId: categoryId ? new ObjectId(categoryId) :null ,images:[]
+        name, description, numberOfPlants, landArea , gardenDetail: _gardenDetail, images:[]
       }
       var imagePaths = []
       
@@ -198,7 +198,7 @@ module.exports.CreatePesticide_UploadMulti = async (req, res) => {
       newData.images = imagePaths; 
 
       //Truy vấn monggo
-        const result = await pesticideModel.create(newData);
+        const result = await gardenModel.create(newData);
         if (!result) {
           response.success = false
           response.message='Có lỗi trong quá trình thực hiện, vui lòng thử lại.'
@@ -215,15 +215,16 @@ module.exports.CreatePesticide_UploadMulti = async (req, res) => {
 };
 
 
-module.exports.UpdatePesticide = async (req, res) => {
+module.exports.UpdateGarden = async (req, res) => {
   const response = new BaseResponse();
   try {
     const { id } = req.params; // Lấy ID từ URL params
-    const {name , description,categoryId = null , oldImages = [], deleteImages=[]} = req.body; // Dữ liệu cập nhật
-    const dataFindById = await pesticideModel.findById(id);
+    const {name , description, numberOfPlants, landArea , oldImages = [], deleteImages=[],gardenDetail} = req.body; // Dữ liệu cập nhật
+    const dataFindById = await gardenModel.findById(id);
     //Xư lý xóa ảnh deleteImages
 
     //
+    var _gardenDetail = []
     var imagePaths = [];
     var _oldImages = []
     var _deleteImages = []
@@ -239,9 +240,15 @@ module.exports.UpdatePesticide = async (req, res) => {
     } catch (error) {
         _deleteImages = []
     }
+    try {
+      _gardenDetail = JSON.parse(gardenDetail)
+      _gardenDetail = _gardenDetail.filter(item=>item != null)
+    } catch (error) {
+        _gardenDetail = []
+    }
     
     const updateData = {
-      name, categoryId : new ObjectId(categoryId), description 
+      name, numberOfPlants, landArea, description ,gardenDetail: _gardenDetail
     }
     if(req.file){
       const imagePath = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
@@ -263,8 +270,7 @@ module.exports.UpdatePesticide = async (req, res) => {
         //Goi hàm xóa ảnh dựa vào _deleteImages
 
         imagePaths = filterImages
-      }
-      else{
+      }else{
         imagePaths = [..._oldImages]
       }
     }
@@ -272,7 +278,7 @@ module.exports.UpdatePesticide = async (req, res) => {
     updateData.images = imagePaths; 
       
     
-    const result = await pesticideModel.findByIdAndUpdate(id, updateData, { new: true });
+    const result = await gardenModel.findByIdAndUpdate(id, updateData, { new: true });
 
     if (!result) {
       response.success = false;
@@ -290,20 +296,25 @@ module.exports.UpdatePesticide = async (req, res) => {
   }
 };
 
-module.exports.UpdatePesticide_UploadMulti = async (req, res) => {
+module.exports.UpdateGarden_UploadMulti = async (req, res) => {
   const response = new BaseResponse();
   try {
     const { id } = req.params; // Lấy ID từ URL params
-    const {name , description, oldImages = [], deleteImages=[]} = req.body; // Dữ liệu cập nhật
-    const dataFindById = await pesticideModel.findById(id);
-    var updateData = {
-      name, categoryId : new ObjectId("67d15bf94fada66e9cd56f0e"), description
-    }
+    const {name , description, numberOfPlants, landArea, oldImages = [], deleteImages=[], gardenDetail = []} = req.body; // Dữ liệu cập nhật
+    const dataFindById = await gardenModel.findById(id);
+    
     
     var imagePaths = []
     var imagePaths_v2 = []
     var _oldImages = []
     var _deleteImages = []
+    var _gardenDetail = []
+    try {
+      _gardenDetail = JSON.parse(gardenDetail)
+      _gardenDetail = _gardenDetail.filter(item=>item != null)
+    } catch (error) {
+        _gardenDetail = []
+    }
     try {
       _oldImages = JSON.parse(oldImages)
       _oldImages = _oldImages.filter(item=>item != null)
@@ -316,6 +327,11 @@ module.exports.UpdatePesticide_UploadMulti = async (req, res) => {
     } catch (error) {
         _deleteImages = []
     }
+
+    var updateData = {
+      name, numberOfPlants, landArea, description , gardenDetail : _gardenDetail
+    }
+
     //Xư lý xóa ảnh deleteImages
     if(_deleteImages.length > 0){
       _deleteImages.map(image => deleteImageFunction(image.keyToDelete))
@@ -350,7 +366,7 @@ module.exports.UpdatePesticide_UploadMulti = async (req, res) => {
 
     updateData.images =imagePaths_v2
 
-    const result = await pesticideModel.findByIdAndUpdate(id, updateData, { new: true });
+    const result = await gardenModel.findByIdAndUpdate(id, updateData, { new: true });
 
     if (!result) {
       response.success = false;
@@ -368,7 +384,7 @@ module.exports.UpdatePesticide_UploadMulti = async (req, res) => {
   }
 };
 
-module.exports.DeletePesticide = async (req, res) => {
+module.exports.DeleteGarden = async (req, res) => {
   const response = new BaseResponse();
   try {
     const { id } = req.params; // Lấy ID từ URL params
@@ -376,8 +392,8 @@ module.exports.DeletePesticide = async (req, res) => {
 
     //Xóa ảnh 
 
-    //Xóa pesticide
-    const result = await pesticideModel.findByIdAndDelete(id);
+    //Xóa garden
+    const result = await gardenModel.findByIdAndDelete(id);
 
     if (!result) {
       response.success = false;
@@ -395,7 +411,7 @@ module.exports.DeletePesticide = async (req, res) => {
   }
 };
 
-module.exports.ImportPesticides = async (req, res) => {
+module.exports.ImportGardens = async (req, res) => {
   const response = new BaseResponse();
   try {
     if (!req.file) {
@@ -407,6 +423,7 @@ module.exports.ImportPesticides = async (req, res) => {
     var successCount = 0;
     // Đọc file Excel
     const workbook = xlsx.readFile(req.file.path);
+    //const sheetName = workbook.SheetNames[0];
     const sheet = workbook.Sheets[sheetName];
 
     // Lấy phạm vi dữ liệu trong sheet
@@ -417,7 +434,9 @@ module.exports.ImportPesticides = async (req, res) => {
     toRow = toRow ? parseInt(toRow) : range.e.r;
 
     if (fromRow < range.s.r + 1 || toRow > range.e.r || fromRow > toRow) {
-      return res.status(400).json({ message: "Invalid row range" });
+      response.success = false
+      response.message = "Invalid row range"
+      return res.status(400).json(response);
     }
 
 
@@ -426,16 +445,17 @@ module.exports.ImportPesticides = async (req, res) => {
     for (let rowNum = fromRow; rowNum <= toRow; rowNum++) {
       const row = {
         name: sheet[xlsx.utils.encode_cell({ r: rowNum, c: 0 })]?.v,
-        description: sheet[xlsx.utils.encode_cell({ r: rowNum, c: 1 })]?.v,
-        //categoryId: sheet[xlsx.utils.encode_cell({ r: rowNum, c: 2 })]?.v || null,
+        numberOfPlants: sheet[xlsx.utils.encode_cell({ r: rowNum, c: 1 })]?.v,
+        landArea: sheet[xlsx.utils.encode_cell({ r: rowNum, c: 2 })]?.v || null,
+        description: sheet[xlsx.utils.encode_cell({ r: rowNum, c: 3 })]?.v || null,
         images: [],
       };
 
       // Kiểm tra dữ liệu hợp lệ trước khi thêm vào DB
-      newData = {...row, categoryId: new ObjectId(row.categoryId)}
+      newData = {...row}
       if (newData.name) {
         try {
-          await pesticideModel.create(newData);
+          await gardenModel.create(newData);
           successCount++;
         } catch (error) {
           failedItems.push({ newData, error: error.message });
@@ -450,6 +470,11 @@ module.exports.ImportPesticides = async (req, res) => {
 
     var URL_dowloadFailed = exportToExcel(req,failedItems)
 
+    if(data.length == 0 || URL_dowload == ""){
+      response.success = false;
+      response.message = "Không có dữ liệu để export!";
+      return res.json(response);
+    }
     response.success = true;
     response.message = "Import  thành công!";
     response.data={
@@ -470,8 +495,8 @@ module.exports.ImportPesticides = async (req, res) => {
 module.exports.ExportWithFilter = async (req, res) => {
   const response = new BaseResponse();
   try {
-    var URL_dowload ="";
-    const { keySearch, categoryId = null, page = 1, pageSize = 10, sortField = "createdAt", sortOrder = "desc", sortOptions } = req.body;
+    let URL_dowload = "";
+    const { keySearch, page = 1, pageSize = 10, sortField = "createdAt", sortOrder = "desc" } = req.body;
 
     // Tạo bộ lọc tìm kiếm
     const filter = {};
@@ -481,33 +506,12 @@ module.exports.ExportWithFilter = async (req, res) => {
         { description: { $regex: keySearch, $options: "i" } },
       ];
     }
-    // Nếu categoryId có giá trị hợp lệ, thêm vào filter
-    if (categoryId && ObjectId.isValid(categoryId)) {
-      filter.categoryId = new ObjectId(categoryId);
-    }
 
-    const data = await pesticideModel.aggregate([
-      { $match: filter },
-      {
-        $lookup: {
-          from: "categories",
-          localField: "categoryId",
-          foreignField: "_id",
-          as: "category",
-        },
-      },
-      { $unwind: { path: "$category", preserveNullAndEmptyArrays: true } }, // Giải nén category
-      {
-        $project: {
-          name: 1,
-          description: 1,
-          categoryId: 1,
-        },
-      },
-      { $sort: sortOptions || { _id: 1 } },
-    ]);
+    const data = await gardenModel
+      .find(filter)
+      .sort({ [sortField]: sortOrder === "desc" ? -1 : 1 });
 
-    URL_dowload = exportToExcel(req, data)    
+    URL_dowload = exportToExcel(req, data);
 
     if(data.length == 0 || URL_dowload == ""){
       response.success = false;
@@ -516,8 +520,8 @@ module.exports.ExportWithFilter = async (req, res) => {
     }
 
     response.success = true;
-    response.message = "Export  thành công!";
-    response.data = URL_dowload
+    response.message = "Export thành công!";
+    response.data = URL_dowload;
     res.json(response);
   } catch (error) {
     response.success = false;
@@ -526,19 +530,14 @@ module.exports.ExportWithFilter = async (req, res) => {
   }
 };
 
-module.exports.ExportAllPesticide = async (req, res) => {
+
+module.exports.ExportAllGarden = async (req, res) => {
   const response = new BaseResponse();
   try {
     var URL_dowload ="";
-    const data = await pesticideModel.find().sort({ _id: 1 }).exec();
+    const data = await gardenModel.find().sort({ _id: 1 }).exec();
     
-    URL_dowload = exportToExcel(req,data)   
-    
-    if(data.length == 0 || URL_dowload == ""){
-      response.success = false;
-      response.message = "Không có dữ liệu để export!";
-      return res.json(response);
-    }
+    URL_dowload = exportToExcel(req,data)    
 
     response.success = true;
     response.message = "Export  thành công!";
@@ -558,10 +557,7 @@ function exportToExcel(req,data) {
     return ""
   }
   var result = ""
-  // const EXPORT_DIR = path.join(__dirname, "..","exports");
-  // if (!fs.existsSync(EXPORT_DIR)) {
-  //   fs.mkdirSync(EXPORT_DIR);
-  // } 
+
   const EXPORT_DIR = path.resolve(__dirname, "..", "exports");
 
   if (!fs.existsSync(EXPORT_DIR)) {
@@ -569,16 +565,16 @@ function exportToExcel(req,data) {
   }
   
   try {
-    const fileName = `ExportPesticide_${Date.now()}.xlsx`;
+    const fileName = `ExportGarden_${Date.now()}.xlsx`;
     const filePath = path.join(EXPORT_DIR, fileName);
   
     // Header tùy chỉnh
     const worksheet = xlsx.utils.aoa_to_sheet([
-      ["Tên sản phẩm", "Mô tả", "Mã danh mục"], // Header
+      ["Tên ", "Số lượng cây", "Diện tích", "Mô tả"], // Header
     ]);
   
     // Thêm dữ liệu vào sheet
-    const dataRows = data.map((item) => [item.name, item.description, item.categoryId]);
+    const dataRows = data.map((item) => [item.name, item.numberOfPlants,item.landArea, item.description]);
     xlsx.utils.sheet_add_aoa(worksheet, dataRows, { origin: "A2" });
   
     // Tạo workbook và ghi file

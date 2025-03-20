@@ -76,6 +76,35 @@ module.exports.GetAllPlant = async (req, res) => {
   }
 };
 
+module.exports.GetAllPlantFK = async (req, res) => {
+  const response = new BaseResponse();
+  try {
+    const sortField = "createdAt";
+    const sortOrder = "desc"
+
+    // Xác định hướng sắp xếp (1: tăng dần, -1: giảm dần)
+    const sortDirection = sortOrder.toLowerCase() === "asc" ? 1 : -1;
+    const sortOptions = { [sortField]: sortDirection };
+
+
+    // Truy vấn dữ liệu có phân trang và sắp xếp
+    const data = await plantModel
+      .find()
+      .sort(sortOptions); // Áp dụng sắp xếp
+      
+
+    // Trả về kết quả cho frontend
+    response.success = true;
+    response.data = data;
+
+    res.json(response);
+  } catch (error) {
+    response.success = false;
+    response.message = error.toString();
+    res.status(500).json(response);
+  }
+};
+
 
 module.exports.SeachPlant = async (req, res) => {
   let response = new BaseResponse();
@@ -265,6 +294,9 @@ module.exports.UpdatePlant = async (req, res) => {
 
         imagePaths = filterImages
       }
+      else{
+        imagePaths = [..._oldImages]
+      }
     }
 
     updateData.images = imagePaths; 
@@ -342,6 +374,9 @@ module.exports.UpdatePlant_UploadMulti = async (req, res) => {
 
         imagePaths_v2 = filterImages
       }
+      else{
+        imagePaths_v2 = [..._oldImages]
+      }
     }
 
     updateData.images =imagePaths_v2
@@ -398,12 +433,11 @@ module.exports.ImportPlants = async (req, res) => {
       return res.status(400).json({ message: "No file uploaded" });
     }
 
-    let { fromRow = 1, toRow = 1 } = req.body;
+    let { fromRow = 1, toRow = 1, sheetName = "Sheet1" } = req.body;
     var failedItems=[]
     var successCount = 0;
     // Đọc file Excel
     const workbook = xlsx.readFile(req.file.path);
-    const sheetName = workbook.SheetNames[0];
     const sheet = workbook.Sheets[sheetName];
 
     // Lấy phạm vi dữ liệu trong sheet
@@ -504,7 +538,19 @@ module.exports.ExportWithFilter = async (req, res) => {
       { $sort: sortOptions || { _id: 1 } },
     ]);
 
-    URL_dowload = exportToExcel(req, data)    
+    URL_dowload = exportToExcel(req, data) 
+    
+    if(data.length == 0 || URL_dowload == ""){
+      response.success = false;
+      response.message = "Không có dữ liệu để export!";
+      return res.json(response);
+    }
+
+    if(data.length == 0 || URL_dowload == ""){
+      response.success = false;
+      response.message = "Không có dữ liệu để export!";
+      return res.json(response);
+    }
 
     response.success = true;
     response.message = "Export  thành công!";
