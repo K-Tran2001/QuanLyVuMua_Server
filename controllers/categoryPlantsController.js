@@ -8,7 +8,7 @@ module.exports.GetAllCategoryPlants = async (req, res) => {
   try {
     const { keySearch,typeReq ="plant", page = 1, pageSize = 10, sortField = "createdAt", sortOrder = "desc" } = req.body;
 
-    // Tạo bộ lọc tìm kiếm
+    
     const filter = {};
     if (keySearch) {
       filter.$or = [
@@ -120,7 +120,7 @@ module.exports.CreateCategoryPlants = async (req, res) => {
         const result = await categoryModel.create(newData);
         if (!result) {
           response.success = false
-          response.message='Có lỗi trong quá trình thực hiện, vui lòng thử lại.'
+          response.message='An error occurred during the execution, please try again.'
           return res.json(response);
         }
         response.success = true
@@ -143,7 +143,7 @@ module.exports.UpdateCategoryPlants = async (req, res) => {
 
     if (!result) {
       response.success = false;
-      response.message = "Không tìm thấy dữ liệu cần cập nhật.";
+      response.message = "No data found to update..";
       return res.json(response);
     }
 
@@ -166,12 +166,12 @@ module.exports.DeleteCategoryPlants = async (req, res) => {
 
     if (!result) {
       response.success = false;
-      response.message = "Không tìm thấy dữ liệu để xóa.";
+      response.message = "No data found to delete.";
       return res.json(response);
     }
 
     response.success = true;
-    response.message = "Xóa  thành công!";
+    response.message = "Deleted successfully!";
     res.json(response);
   } catch (error) {
     response.success = false;

@@ -12,7 +12,7 @@ module.exports.GetAllPartner = async (req, res) => {
   try {
     const { keySearch, page = 1, pageSize = 10, sortField = "createdAt", sortOrder = "desc", sortOptions } = req.body;
 
-    // Tạo bộ lọc tìm kiếm
+    
     const filter = {};
     if (keySearch) {
       filter.$or = [
@@ -112,7 +112,7 @@ module.exports.CreatePartner = async (req, res) => {
         const result = await partnerModel.create(newData);
         if (!result) {
           response.success = false
-          response.message='Có lỗi trong quá trình thực hiện, vui lòng thử lại.'
+          response.message='An error occurred during the execution, please try again.'
           return res.json(response);
         }
         response.success = true
@@ -155,7 +155,7 @@ module.exports.CreatePartner_UploadMulti = async (req, res) => {
         const result = await partnerModel.create(newData);
         if (!result) {
           response.success = false
-          response.message='Có lỗi trong quá trình thực hiện, vui lòng thử lại.'
+          response.message='An error occurred during the execution, please try again.'
           return res.json(response);
         }
         response.success = true
@@ -230,7 +230,7 @@ module.exports.UpdatePartner = async (req, res) => {
 
     if (!result) {
       response.success = false;
-      response.message = "Không tìm thấy dữ liệu cần cập nhật.";
+      response.message = "No data found to update..";
       return res.json(response);
     }
 
@@ -308,7 +308,7 @@ module.exports.UpdatePartner_UploadMulti = async (req, res) => {
 
     if (!result) {
       response.success = false;
-      response.message = "Không tìm thấy dữ liệu cần cập nhật.";
+      response.message = "No data found to update..";
       return res.json(response);
     }
 
@@ -335,12 +335,12 @@ module.exports.DeletePartner = async (req, res) => {
 
     if (!result) {
       response.success = false;
-      response.message = "Không tìm thấy dữ liệu để xóa.";
+      response.message = "No data found to delete.";
       return res.json(response);
     }
 
     response.success = true;
-    response.message = "Xóa  thành công!";
+    response.message = "Deleted successfully!";
     res.json(response);
   } catch (error) {
     response.success = false;
@@ -431,7 +431,7 @@ module.exports.ExportWithFilter = async (req, res) => {
     let URL_dowload = "";
     const { keySearch, page = 1, pageSize = 10, sortField = "createdAt", sortOrder = "desc" } = req.body;
 
-    // Tạo bộ lọc tìm kiếm
+    
     const filter = {};
     if (keySearch) {
       filter.$or = [

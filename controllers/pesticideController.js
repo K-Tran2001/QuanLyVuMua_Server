@@ -12,7 +12,7 @@ module.exports.GetAllPesticide = async (req, res) => {
   try {
     const { keySearch, categoryId = null, page = 1, pageSize = 10, sortField = "createdAt", sortOrder = "desc", sortOptions } = req.body;
 
-    // Tạo bộ lọc tìm kiếm
+    
     const filter = {};
     if (keySearch) {
       filter.$or = [
@@ -20,7 +20,7 @@ module.exports.GetAllPesticide = async (req, res) => {
         { description: { $regex: keySearch, $options: "i" } },
       ];
     }
-    // Nếu categoryId có giá trị hợp lệ, thêm vào filter
+    
     if (categoryId && ObjectId.isValid(categoryId)) {
       filter.categoryId = new ObjectId(categoryId);
     }
@@ -158,7 +158,7 @@ module.exports.CreatePesticide = async (req, res) => {
         const result = await pesticideModel.create(newData);
         if (!result) {
           response.success = false
-          response.message='Có lỗi trong quá trình thực hiện, vui lòng thử lại.'
+          response.message='An error occurred during the execution, please try again.'
           return res.json(response);
         }
         response.success = true
@@ -201,7 +201,7 @@ module.exports.CreatePesticide_UploadMulti = async (req, res) => {
         const result = await pesticideModel.create(newData);
         if (!result) {
           response.success = false
-          response.message='Có lỗi trong quá trình thực hiện, vui lòng thử lại.'
+          response.message='An error occurred during the execution, please try again.'
           return res.json(response);
         }
         response.success = true
@@ -276,7 +276,7 @@ module.exports.UpdatePesticide = async (req, res) => {
 
     if (!result) {
       response.success = false;
-      response.message = "Không tìm thấy dữ liệu cần cập nhật.";
+      response.message = "No data found to update..";
       return res.json(response);
     }
 
@@ -294,10 +294,10 @@ module.exports.UpdatePesticide_UploadMulti = async (req, res) => {
   const response = new BaseResponse();
   try {
     const { id } = req.params; // Lấy ID từ URL params
-    const {name , description, oldImages = [], deleteImages=[]} = req.body; // Dữ liệu cập nhật
+    const {name , description, categoryId, oldImages = [], deleteImages=[]} = req.body; // Dữ liệu cập nhật
     const dataFindById = await pesticideModel.findById(id);
     var updateData = {
-      name, categoryId : new ObjectId("67d15bf94fada66e9cd56f0e"), description
+      name, categoryId : categoryId ? new ObjectId(categoryId) :null, description
     }
     
     var imagePaths = []
@@ -354,7 +354,7 @@ module.exports.UpdatePesticide_UploadMulti = async (req, res) => {
 
     if (!result) {
       response.success = false;
-      response.message = "Không tìm thấy dữ liệu cần cập nhật.";
+      response.message = "No data found to update..";
       return res.json(response);
     }
 
@@ -381,12 +381,12 @@ module.exports.DeletePesticide = async (req, res) => {
 
     if (!result) {
       response.success = false;
-      response.message = "Không tìm thấy dữ liệu để xóa.";
+      response.message = "No data found to delete.";
       return res.json(response);
     }
 
     response.success = true;
-    response.message = "Xóa  thành công!";
+    response.message = "Deleted successfully!";
     res.json(response);
   } catch (error) {
     response.success = false;
@@ -473,7 +473,7 @@ module.exports.ExportWithFilter = async (req, res) => {
     var URL_dowload ="";
     const { keySearch, categoryId = null, page = 1, pageSize = 10, sortField = "createdAt", sortOrder = "desc", sortOptions } = req.body;
 
-    // Tạo bộ lọc tìm kiếm
+    
     const filter = {};
     if (keySearch) {
       filter.$or = [
@@ -481,7 +481,7 @@ module.exports.ExportWithFilter = async (req, res) => {
         { description: { $regex: keySearch, $options: "i" } },
       ];
     }
-    // Nếu categoryId có giá trị hợp lệ, thêm vào filter
+    
     if (categoryId && ObjectId.isValid(categoryId)) {
       filter.categoryId = new ObjectId(categoryId);
     }

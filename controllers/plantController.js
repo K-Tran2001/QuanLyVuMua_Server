@@ -13,7 +13,7 @@ module.exports.GetAllPlant = async (req, res) => {
   try {
     const { keySearch, categoryId = null, page = 1, pageSize = 10, sortField = "createdAt", sortOrder = "desc", sortOptions } = req.body;
 
-    // Tạo bộ lọc tìm kiếm
+    
     const filter = {};
     if (keySearch) {
       filter.$or = [
@@ -21,7 +21,7 @@ module.exports.GetAllPlant = async (req, res) => {
         { description: { $regex: keySearch, $options: "i" } },
       ];
     }
-    // Nếu categoryId có giá trị hợp lệ, thêm vào filter
+    
     if (categoryId && ObjectId.isValid(categoryId)) {
       filter.categoryId = new ObjectId(categoryId);
     }
@@ -188,7 +188,7 @@ module.exports.CreatePlant = async (req, res) => {
         const result = await plantModel.create(newData);
         if (!result) {
           response.success = false
-          response.message='Có lỗi trong quá trình thực hiện, vui lòng thử lại.'
+          response.message='An error occurred during the execution, please try again.'
           return res.json(response);
         }
         response.success = true
@@ -231,7 +231,7 @@ module.exports.CreatePlant_UploadMulti = async (req, res) => {
         const result = await plantModel.create(newData);
         if (!result) {
           response.success = false
-          response.message='Có lỗi trong quá trình thực hiện, vui lòng thử lại.'
+          response.message='An error occurred during the execution, please try again.'
           return res.json(response);
         }
         response.success = true
@@ -271,7 +271,7 @@ module.exports.UpdatePlant = async (req, res) => {
     }
     
     const updateData = {
-      name, categoryId : new ObjectId(categoryId), description 
+      name, categoryId : categoryId ? new ObjectId(categoryId) :null, description 
     }
     if(req.file){
       const imagePath = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
@@ -300,13 +300,13 @@ module.exports.UpdatePlant = async (req, res) => {
     }
 
     updateData.images = imagePaths; 
-      
+    
     
     const result = await plantModel.findByIdAndUpdate(id, updateData, { new: true });
 
     if (!result) {
       response.success = false;
-      response.message = "Không tìm thấy dữ liệu cần cập nhật.";
+      response.message = "No data found to update..";
       return res.json(response);
     }
 
@@ -324,10 +324,10 @@ module.exports.UpdatePlant_UploadMulti = async (req, res) => {
   const response = new BaseResponse();
   try {
     const { id } = req.params; // Lấy ID từ URL params
-    const {name , description, oldImages = [], deleteImages=[]} = req.body; // Dữ liệu cập nhật
+    const {name , description, categoryId, oldImages = [], deleteImages=[]} = req.body; // Dữ liệu cập nhật
     const dataFindById = await plantModel.findById(id);
     var updateData = {
-      name, categoryId : new ObjectId("67d15bf94fada66e9cd56f0e"), description
+      name, categoryId : categoryId ? new ObjectId(categoryId) :null, description
     }
     
     var imagePaths = []
@@ -385,7 +385,7 @@ module.exports.UpdatePlant_UploadMulti = async (req, res) => {
 
     if (!result) {
       response.success = false;
-      response.message = "Không tìm thấy dữ liệu cần cập nhật.";
+      response.message = "No data found to update..";
       return res.json(response);
     }
 
@@ -412,12 +412,12 @@ module.exports.DeletePlant = async (req, res) => {
 
     if (!result) {
       response.success = false;
-      response.message = "Không tìm thấy dữ liệu để xóa.";
+      response.message = "No data found to delete.";
       return res.json(response);
     }
 
     response.success = true;
-    response.message = "Xóa  thành công!";
+    response.message = "Deleted successfully!";
     res.json(response);
   } catch (error) {
     response.success = false;
@@ -504,7 +504,7 @@ module.exports.ExportWithFilter = async (req, res) => {
     var URL_dowload ="";
     const { keySearch, categoryId = null, page = 1, pageSize = 10, sortField = "createdAt", sortOrder = "desc", sortOptions } = req.body;
 
-    // Tạo bộ lọc tìm kiếm
+    
     const filter = {};
     if (keySearch) {
       filter.$or = [
@@ -512,7 +512,7 @@ module.exports.ExportWithFilter = async (req, res) => {
         { description: { $regex: keySearch, $options: "i" } },
       ];
     }
-    // Nếu categoryId có giá trị hợp lệ, thêm vào filter
+    
     if (categoryId && ObjectId.isValid(categoryId)) {
       filter.categoryId = new ObjectId(categoryId);
     }

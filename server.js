@@ -7,6 +7,7 @@ const authRouter = require('./routers/authRouter')
 const categoryRouter = require('./routers/categoryRouter')
 const plantRouter = require('./routers/plantRouter')
 const billRouter = require('./routers/billRouter')
+const dashboardRouter = require('./routers/dashboardRouter')
 const pesticideRouter = require('./routers/pesticideRouter')
 const gardenRouter = require('./routers/gardenRouter')
 const partnerRouter = require('./routers/partnerRouter')
@@ -31,6 +32,7 @@ app.use(pesticideRouter);
 app.use(gardenRouter);
 app.use(partnerRouter);
 app.use(billRouter);
+app.use(dashboardRouter);
 app.use(authRouter)
 app.use(categoryRouter)
 app.use(uploadRoter)

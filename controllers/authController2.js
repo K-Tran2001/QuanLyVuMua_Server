@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const userModel = require("../models/userModel"); // Giả sử bạn có model User
 const dotenv = require("dotenv");
 const BaseResponse = require("./BaseResponse");
+const path = require('path');
 dotenv.config();
 
 const accessTokenLife = process.env.ACCESS_TOKEN_LIFE;
@@ -12,7 +13,7 @@ const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET;
 
 const GenerateTokens = (user) => {
     const accessToken = jwt.sign(
-        { id: user._id, username: user.username,fullName : user.firstName + " " + user.lastName },
+        { id: user._id, username: user.username,fullName : user.firstName + " " + user.lastName, avatarPath : user?.avatar !=null ? user?.avatar?.imageAbsolutePath : "" },
         accessTokenSecret,
         { expiresIn: accessTokenLife }
     );
@@ -122,6 +123,90 @@ module.exports.ChangePassword = async (req, res) => {
       res.status(500).json(response);
     }
 };
+
+module.exports.UpdateUserProfile = async (req, res) => {
+  const response = new BaseResponse();
+  try {
+    const { id } = req.params; // Lấy ID từ URL params
+    const {} = req.body; // Dữ liệu cập nhật
+    var updateData = {
+    }
+    const dataFindById = await userModel.findById(id);
+    if(dataFindById){
+      updateData = dataFindById
+    }else{
+      response.success = false;
+      response.message = "No data found to update..";
+      return res.json(response);
+    }
+
+    var imagePaths = []
+    if (req.files && req.files.length > 0) {//Có upload mới
+        imagePaths = req.files.map((file,index) =>({
+        imageAbsolutePath:`${req.protocol}://${req.get("host")}/uploads/${file.filename}`,
+        fileName: file.filename,
+        keyToDelete : path.join(__dirname, "..",file.path),
+        imageBase64String: "",
+        imageFile: null,
+        isNewUpload:false,
+        displayOrder:index
+
+      })); 
+      
+    }
+    
+    updateData.avatar = imagePaths[0]; 
+    
+    
+    const result = await userModel.findByIdAndUpdate(id, updateData, { new: true });
+
+    if (!result) {
+      response.success = false;
+      response.message = "No data found to update..";
+      return res.json(response);
+    }
+
+    response.success = true;
+    response.data = result._id;
+    res.json(response);
+  } catch (error) {
+    response.success = false;
+    response.message = error.toString();
+    res.status(500).json(response);
+  }
+};
+
+module.exports.SeachUserProfiles = async (req, res) => {
+  let response = new BaseResponse();
+  try {
+    const { id } = req.params; // Lấy ID từ URL params
+
+    if (!id) {
+      response.success = false;
+      response.message = "id is required";
+      return res.status(400).json(response);
+    }
+
+    const result = await userModel.findById(id); // Tìm kiếm theo ID trong MongoDB
+
+    if (!result) {
+      response.success = false;
+      response.message = "Data not found";
+      return res.status(404).json(response);
+    }
+
+    response.success = true;
+    response.data = result;
+    response.message = "Form found successfully";
+    res.json(response);
+  } catch (error) {
+    response.success = false;
+    response.message = error.toString();
+    response.data = null;
+    res.status(500).json(response);
+  }
+};
+
 
 exports.RefreshToken = (req, res) => {
     const { refreshToken } = req.body;
