@@ -15,10 +15,14 @@ const uploadRoter = require('./routers/uploadRoter')
 const uploadCloudinaryRoter = require('./routers/uploadCloudinaryRoter')
 const uploadImgurRoter = require('./routers/uploadImgurRoter')
 const geminiRouter = require('./routers/geminiRouter')
+const formRouter = require('./routers/formRouter')
+const { PushNotification, GetToken, GetFCMToken } = require('./controllers/pushNotifyController')
 
 const PORT = process.env.PORT || 5000
 app.use(express.json())
 app.use(cors())
+
+require("./helpers/cronJobs");
 
 // Cho phép truy cập ảnh từ thư mục "uploads"
 app.use("/uploads", express.static("uploads"));
@@ -39,7 +43,11 @@ app.use(uploadRoter)
 app.use(uploadImgurRoter)
 app.use(uploadCloudinaryRoter)
 app.use(geminiRouter)
+app.use(formRouter)
 app.get("/",(req,res)=>res.json({response:"hello"}))
+app.post("/push-notify",PushNotification)
+app.post("/push-token",GetToken)
+app.post("/push-fcm-token",GetFCMToken)
 
 // app.use(cors({
 //     origin: '*', // hoặc cụ thể 'http://your-expo-ip:port'

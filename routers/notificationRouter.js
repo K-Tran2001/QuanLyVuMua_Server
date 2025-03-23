@@ -1,11 +1,13 @@
 const  {Router} = require('express');
-const { PushNotification } = require('../controllers/PushNotifyController');
+const { PushNotification, PushFCMNotification } = require('../controllers/PushNotifyController');
 const router = Router();
 
 
 
 
 router.post("/api/push-notify",PushNotification)
+
+router.post("/api/push-fcm-notify",PushFCMNotification)
 
 
 
